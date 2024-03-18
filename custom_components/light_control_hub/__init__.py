@@ -68,3 +68,30 @@
 #         self._state = False
 
 """The light control hub component"""
+
+# from homeassistant.helpers import entity_platform
+# from voluptuous import Schema
+# from homeassistant.helpers import entity_registry
+
+# async def async_setup(hass, config):
+#     def handle_dim(call):
+#         entity_id = call.data.get('entity_id')
+#         level = call.data.get('level')
+
+#         # Get the entity registry
+#         ent_reg = entity_registry.async_get(hass)
+
+#         # Get the entity from the entity registry
+#         entity = ent_reg.async_get(entity_id)
+#         if entity is not None:
+#             # You need to get the entity's state object to call its methods
+#             state = hass.states.get(entity_id)
+#             if state is not None:
+#                 state.dim(level)
+
+#     hass.services.async_register('switch', 'dim', handle_dim, schema=Schema({
+#         'entity_id': str,
+#         'level': int,
+#     }))
+
+#     return True
