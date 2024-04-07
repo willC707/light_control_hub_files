@@ -1,5 +1,6 @@
 import serial
 import logging
+import asyncio
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.helpers import entity_platform
 #from homeassistant.helpers import config_validation as vol
@@ -23,6 +24,7 @@ class LightControlSwitch(SwitchEntity):
         self._ser = ser
         self._state = False
         self._dim_state = None
+        self._update_task = None
 
     @property
     def name(self):
@@ -51,7 +53,31 @@ class LightControlSwitch(SwitchEntity):
         self._state = True
         self.async_schedule_update_ha_state()
 
+    async def _update_state(self):
+        while True:
+            if self._ser.in_waiting:
+                state = self._ser.read().decode()
+                if state == 'I':
+                    self._state = True
+                elif state == 'O':
+                    self._state = False
+                elif state in ['A', 'B', 'C']:
+                    self._dim_state = state.encode()
+                    self._state = True
+                self.async_schedule_update_ha_state()
+            await asyncio.sleep(1)
+    
+    # async def async_will_remove_from_hass(self):
+    #     # Cancel the _update_state task
+    #     if self._update_task:
+    #         self._update_task.cancel()
+
+    #     # Close the serial connection
+    #     if self._ser:
+    #         self._ser.close()
+
     async def async_added_to_hass(self):
+        self._update_task = asyncio.create_task(self._update_state())
         def handle_dim(call):
             entity_id = call.data.get('entity_id')
             level = call.data.get('level')
